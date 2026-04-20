@@ -1,0 +1,21 @@
+# Laravel vendor
+backend/vendor/
+backend/node_modules/
+backend/.env
+backend/storage/logs/*.log
+backend/storage/framework/cache/data/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/bootstrap/cache/*.php
+backend/database/database.sqlite
+
+# Flutter
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/build/
+frontend/.packages
+
+# OS
+.DS_Store
+Thumbs.db

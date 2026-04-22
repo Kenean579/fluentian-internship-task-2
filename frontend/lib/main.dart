@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/session_provider.dart';
+import 'screens/qr_scanner_screen.dart';
 
 void main() {
-  runApp(const SmartRestaurantApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SessionProvider()),
+      ],
+      child: const SmartRestaurantApp(),
+    ),
+  );
 }
 
 class SmartRestaurantApp extends StatelessWidget {
@@ -11,15 +21,12 @@ class SmartRestaurantApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Smart Restaurant',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
         useMaterial3: true,
       ),
-      home: const Scaffold(
-        body: Center(
-          child: Text('Smart Restaurant Ordering System'),
-        ),
-      ),
+      home: const QRScannerScreen(),
     );
   }
 }

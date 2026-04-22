@@ -10,7 +10,6 @@ return new class extends Migration
     {
         Schema::create('menu_items', function (Blueprint $table) {
             $table->id();
-            // Foreign key linking to the categories table
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->text('description')->nullable();

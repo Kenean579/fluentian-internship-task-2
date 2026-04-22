@@ -15,14 +15,8 @@ return new class extends Migration
     {
         Schema::create('table_sessions', function (Blueprint $table) {
             $table->id();
-
-            // The table number or identifier (e.g. "Table 5")
             $table->string('table_id');
-
-            // A unique ID generated on the customer's device (browser or phone)
-            // Indexed for fast lookups when restoring sessions
             $table->string('user_device_id')->index();
-
             $table->timestamps();
         });
     }

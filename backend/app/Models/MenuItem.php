@@ -19,14 +19,12 @@ class MenuItem extends Model
         'image_url',
     ];
 
-    // Explicitly cast attributes
     protected $casts = [
         'price' => 'decimal:2',
         'available' => 'boolean',
         'prep_time' => 'integer',
     ];
 
-    // A menu item belongs to a category
     public function category()
     {
         return $this->belongsTo(Category::class);

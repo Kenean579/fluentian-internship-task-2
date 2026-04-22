@@ -15,7 +15,6 @@ class Category extends Model
         'display_order',
     ];
 
-    // A category has many menu items
     public function menuItems()
     {
         return $this->hasMany(MenuItem::class);

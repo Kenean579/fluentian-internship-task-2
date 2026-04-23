@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../providers/session_provider.dart';
+import 'menu_screen.dart';
 
 class QRScannerScreen extends StatefulWidget {
   const QRScannerScreen({super.key});
@@ -35,9 +36,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             .startSession(tableId);
         
         if (success && mounted) {
-          // Temporarily show success, later we will navigate to MenuScreen
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Connected to $tableId!')),
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const MenuScreen()),
           );
         }
       } else {

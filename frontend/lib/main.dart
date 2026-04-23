@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/session_provider.dart';
 import 'providers/cart_provider.dart';
+import 'providers/menu_provider.dart';
 import 'screens/qr_scanner_screen.dart';
 
 void main() {
@@ -10,6 +11,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => SessionProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => MenuProvider()),
       ],
       child: const SmartRestaurantApp(),
     ),

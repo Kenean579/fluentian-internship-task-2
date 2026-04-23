@@ -12,63 +12,74 @@ use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
-    public function index($sessionId)
+    public function place(Request $request, $sessionId)
     {
-        $session = TableSession::find($sessionId);
+        $session = TableSession::findOrFail($sessionId);
 
-        if (!$session) {
-            return response()->json(['message' => 'Session not found'], 404);
+        $cart = Cart::where('session_id', $session->id)
+            ->with('items.menuItem')
+            ->first();
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return response()->json([
+                'message' => 'Cart is empty. Please add items before placing an order.',
+            ], 422);
         }
+
+        $totalAmount = $cart->items->sum(function ($item) {
+            return $item->unit_price * $item->quantity;
+        });
+
+        $orderNumber = 'ORD-' . strtoupper(Str::random(6));
+
+        $order = Order::create([
+            'order_number' => $orderNumber,
+            'session_id' => $session->id,
+            'status' => 'Received',
+            'total_amount' => $totalAmount,
+        ]);
+
+        // Copy each cart item into the order as an order item
+        foreach ($cart->items as $cartItem) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'menu_item_id' => $cartItem->menu_item_id,
+                'quantity' => $cartItem->quantity,
+                'unit_price' => $cartItem->unit_price,
+            ]);
+        }
+
+        $cart->items()->delete();
+        $order->load('items.menuItem');
+
+        return response()->json([
+            'message' => 'Order placed successfully!',
+            'data' => $order,
+        ], 201);
+    }
+
+    public function show($orderId)
+    {
+        $order = Order::with('items.menuItem')->findOrFail($orderId);
+
+        return response()->json([
+            'message' => 'Order fetched successfully',
+            'data' => $order,
+        ]);
+    }
+
+    public function sessionOrders($sessionId)
+    {
+        $session = TableSession::findOrFail($sessionId);
 
         $orders = Order::with('items.menuItem')
             ->where('session_id', $session->id)
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return response()->json($orders);
-    }
-
-    public function store($sessionId)
-    {
-        $session = TableSession::find($sessionId);
-
-        if (!$session) {
-            return response()->json(['message' => 'Session not found'], 404);
-        }
-
-        if (!$session->is_active) {
-            return response()->json(['message' => 'Session is not active'], 400);
-        }
-
-        $cart = Cart::with('items.menuItem')->where('session_id', $session->id)->first();
-
-        if (!$cart || $cart->items->isEmpty()) {
-            return response()->json(['message' => 'Cart is empty'], 400);
-        }
-
-        $totalAmount = $cart->items->sum(function ($item) {
-            return $item->quantity * $item->menuItem->price;
-        });
-
-        $order = Order::create([
-            'order_number' => 'ORD-' . strtoupper(Str::random(6)),
-            'session_id' => $session->id,
-            'status' => 'Received',
-            'total_amount' => $totalAmount,
+        return response()->json([
+            'message' => 'Session orders fetched successfully',
+            'data' => $orders,
         ]);
-
-        foreach ($cart->items as $cartItem) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'menu_item_id' => $cartItem->menu_item_id,
-                'quantity' => $cartItem->quantity,
-                'unit_price' => $cartItem->menuItem->price,
-            ]);
-        }
-
-        // Clear the cart
-        $cart->items()->delete();
-
-        return response()->json($order->load('items.menuItem'), 201);
     }
 }

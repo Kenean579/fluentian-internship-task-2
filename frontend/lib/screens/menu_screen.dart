@@ -4,6 +4,8 @@ import '../providers/menu_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/session_provider.dart';
 import 'cart_screen.dart';
+import 'staff_panel_screen.dart';
+
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -41,6 +43,17 @@ class _MenuScreenState extends State<MenuScreen> {
         actions: [
           Stack(
             children: [
+              IconButton(
+                icon: const Icon(Icons.admin_panel_settings_outlined),
+                tooltip: 'Staff Panel',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const StaffPanelScreen()),
+                  );
+                },
+              ),
+
               IconButton(
                 icon: const Icon(Icons.shopping_cart),
                 onPressed: () {

@@ -42,5 +42,19 @@ class ApiService {
       throw Exception('API Error: ${response.statusCode}');
     }
   }
+    static Future<Map<String, dynamic>> patch(String endpoint, Map<String, dynamic> data) async {
+    final response = await http.patch(
+      Uri.parse('$baseUrl$endpoint'),
+      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      body: jsonEncode(data),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('API Error: ${response.statusCode}');
+    }
+  }
+
 
 }

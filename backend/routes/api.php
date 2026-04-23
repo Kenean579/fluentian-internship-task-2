@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\MenuController;
 use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\OrderController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -16,3 +17,6 @@ Route::get('/menu', [MenuController::class, 'index']);
 Route::get('/sessions/{sessionId}/cart', [CartController::class, 'show']);
 Route::post('/sessions/{sessionId}/cart', [CartController::class, 'add']);
 Route::delete('/sessions/{sessionId}/cart/items/{cartItemId}', [CartController::class, 'remove']);
+
+Route::get('/sessions/{sessionId}/orders', [OrderController::class, 'index']);
+Route::post('/sessions/{sessionId}/orders', [OrderController::class, 'store']);

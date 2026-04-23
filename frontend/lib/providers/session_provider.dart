@@ -10,6 +10,7 @@ class SessionProvider with ChangeNotifier {
   bool _isLoading = false;
 
   String? get tableId => _tableId;
+  int? get sessionId => _sessionId;
   bool get isLoading => _isLoading;
 
   Future<void> initializeDevice() async {

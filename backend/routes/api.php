@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\MenuController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\StaffController;
+use App\Http\Controllers\Api\RecommendationController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -30,3 +31,6 @@ Route::get('/sessions/{sessionId}/orders', [OrderController::class, 'sessionOrde
 Route::get('/staff/orders/pending', [StaffController::class, 'pendingOrders']);
 Route::get('/staff/orders/all', [StaffController::class, 'allOrders']);
 Route::patch('/staff/orders/{orderId}/status', [StaffController::class, 'updateStatus']);
+
+// AI Recommendation route
+Route::get('/sessions/{sessionId}/recommendations', [RecommendationController::class, 'recommend']);

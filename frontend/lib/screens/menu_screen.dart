@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import '../providers/menu_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/session_provider.dart';
+import '../providers/recommendation_provider.dart';
 import 'cart_screen.dart';
 import 'staff_panel_screen.dart';
+import 'order_history_screen.dart';
 
 
 class MenuScreen extends StatefulWidget {
@@ -20,9 +22,14 @@ class _MenuScreenState extends State<MenuScreen> {
   @override
   void initState() {
     super.initState();
-    // Load the menu when the screen opens
-    Future.microtask(() =>
-        Provider.of<MenuProvider>(context, listen: false).fetchMenu());
+    Future.microtask(() {
+      final session = Provider.of<SessionProvider>(context, listen: false);
+      Provider.of<MenuProvider>(context, listen: false).fetchMenu();
+      if (session.sessionId != null) {
+        Provider.of<RecommendationProvider>(context, listen: false)
+            .fetchRecommendations(session.sessionId!);
+      }
+    });
   }
 
   @override
@@ -30,6 +37,7 @@ class _MenuScreenState extends State<MenuScreen> {
     final menuProvider = Provider.of<MenuProvider>(context);
     final cart = Provider.of<CartProvider>(context);
     final session = Provider.of<SessionProvider>(context);
+    final recs = Provider.of<RecommendationProvider>(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -44,23 +52,10 @@ class _MenuScreenState extends State<MenuScreen> {
           Stack(
             children: [
               IconButton(
-                icon: const Icon(Icons.admin_panel_settings_outlined),
-                tooltip: 'Staff Panel',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const StaffPanelScreen()),
-                  );
-                },
-              ),
-
-              IconButton(
                 icon: const Icon(Icons.shopping_cart),
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const CartScreen()),
-                  );
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const CartScreen()));
                 },
               ),
               if (cart.itemCount > 0)
@@ -70,15 +65,25 @@ class _MenuScreenState extends State<MenuScreen> {
                   child: CircleAvatar(
                     radius: 9,
                     backgroundColor: Colors.red,
-                    child: Text(
-                      '${cart.itemCount}',
-                      style: const TextStyle(
-                          fontSize: 11, color: Colors.white),
-                    ),
+                    child: Text('${cart.itemCount}',
+                        style: const TextStyle(fontSize: 11, color: Colors.white)),
                   ),
                 ),
             ],
           ),
+          IconButton(
+            icon: const Icon(Icons.admin_panel_settings_outlined),
+            tooltip: 'Staff Panel',
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const StaffPanelScreen())),
+          ),
+          IconButton(
+          icon: const Icon(Icons.receipt_long, color: Colors.white),
+          tooltip: 'Order History',
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const OrderHistoryScreen()));
+          },
+        ),
         ],
       ),
       body: menuProvider.isLoading
@@ -98,8 +103,115 @@ class _MenuScreenState extends State<MenuScreen> {
                   ),
                 )
               : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Category filter tabs
+                    // AI Recommendations Carousel
+                    if (recs.isLoading)
+                      const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (recs.recommendations.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+                        child: Text(
+                          recs.sectionTitle,
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 145,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          itemCount: recs.recommendations.length,
+                          itemBuilder: (ctx, index) {
+                            final item = recs.recommendations[index];
+                            return Container(
+                              width: 200,
+                              margin: const EdgeInsets.only(right: 10),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2)),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(item.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14)),
+                                    const SizedBox(height: 4),
+                                    Text(item.description,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Colors.grey, fontSize: 12)),
+                                    const Spacer(),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          '\$${item.price.toStringAsFixed(2)}',
+                                          style: const TextStyle(
+                                              color: Colors.orange,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        GestureDetector(
+                                          onTap: session.sessionId == null
+                                              ? null
+                                              : () async {
+                                                  await cart.addItem(
+                                                      session.sessionId!,
+                                                      item.id,
+                                                      1);
+                                                  if (context.mounted) {
+                                                    ScaffoldMessenger.of(context)
+                                                        .showSnackBar(SnackBar(
+                                                      content: Text(
+                                                          '${item.name} added!'),
+                                                      backgroundColor:
+                                                          Colors.green,
+                                                      duration: const Duration(
+                                                          seconds: 1),
+                                                    ));
+                                                  }
+                                                },
+                                          child: Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.orange,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(Icons.add,
+                                                color: Colors.white, size: 16),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const Divider(height: 1),
+                    ],
+
+                    // Category Filter Tabs 
                     SizedBox(
                       height: 50,
                       child: ListView.builder(
@@ -107,8 +219,7 @@ class _MenuScreenState extends State<MenuScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         itemCount: menuProvider.categories.length,
                         itemBuilder: (ctx, index) {
-                          final isSelected =
-                              _selectedCategoryIndex == index;
+                          final isSelected = _selectedCategoryIndex == index;
                           return GestureDetector(
                             onTap: () =>
                                 setState(() => _selectedCategoryIndex = index),
@@ -116,23 +227,17 @@ class _MenuScreenState extends State<MenuScreen> {
                               duration: const Duration(milliseconds: 200),
                               margin: const EdgeInsets.symmetric(
                                   horizontal: 4, vertical: 8),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16),
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
                               decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Colors.orange
-                                    : Colors.white,
+                                color: isSelected ? Colors.orange : Colors.white,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(color: Colors.orange),
                               ),
                               child: Center(
                                 child: Text(
-                                  menuProvider
-                                      .categories[index].name,
+                                  menuProvider.categories[index].name,
                                   style: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.orange,
+                                    color: isSelected ? Colors.white : Colors.orange,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -143,21 +248,17 @@ class _MenuScreenState extends State<MenuScreen> {
                       ),
                     ),
 
-                    // Menu items list for the selected category
+                    // Menu Items 
                     Expanded(
                       child: ListView.builder(
                         padding: const EdgeInsets.all(12),
                         itemCount: menuProvider
-                            .categories[_selectedCategoryIndex]
-                            .items
-                            .length,
+                            .categories[_selectedCategoryIndex].items.length,
                         itemBuilder: (ctx, index) {
                           final item = menuProvider
-                              .categories[_selectedCategoryIndex]
-                              .items[index];
+                              .categories[_selectedCategoryIndex].items[index];
                           return Card(
-                            margin:
-                                const EdgeInsets.symmetric(vertical: 6),
+                            margin: const EdgeInsets.symmetric(vertical: 6),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)),
                             elevation: 2,
@@ -177,8 +278,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                         const SizedBox(height: 4),
                                         Text(item.description,
                                             style: const TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 13)),
+                                                color: Colors.grey, fontSize: 13)),
                                         const SizedBox(height: 8),
                                         Row(
                                           children: [
@@ -186,8 +286,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                               '\$${item.price.toStringAsFixed(2)}',
                                               style: const TextStyle(
                                                   color: Colors.orange,
-                                                  fontWeight:
-                                                      FontWeight.bold,
+                                                  fontWeight: FontWeight.bold,
                                                   fontSize: 15),
                                             ),
                                             const SizedBox(width: 12),
@@ -195,12 +294,10 @@ class _MenuScreenState extends State<MenuScreen> {
                                                 size: 14,
                                                 color: Colors.grey[600]),
                                             const SizedBox(width: 4),
-                                            Text(
-                                              '${item.prepTime} min',
-                                              style: TextStyle(
-                                                  color: Colors.grey[600],
-                                                  fontSize: 12),
-                                            ),
+                                            Text('${item.prepTime} min',
+                                                style: TextStyle(
+                                                    color: Colors.grey[600],
+                                                    fontSize: 12)),
                                           ],
                                         ),
                                       ],
@@ -218,21 +315,16 @@ class _MenuScreenState extends State<MenuScreen> {
                                     onPressed: session.sessionId == null
                                         ? null
                                         : () async {
-                                            final success =
-                                                await cart.addItem(
-                                              session.sessionId!,
-                                              item.id,
-                                              1,
-                                            );
+                                            final success = await cart.addItem(
+                                                session.sessionId!, item.id, 1);
                                             if (success && context.mounted) {
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(SnackBar(
                                                 content: Text(
                                                     '${item.name} added to cart!'),
-                                                backgroundColor:
-                                                    Colors.green,
-                                                duration: const Duration(
-                                                    seconds: 1),
+                                                backgroundColor: Colors.green,
+                                                duration:
+                                                    const Duration(seconds: 1),
                                               ));
                                             }
                                           },

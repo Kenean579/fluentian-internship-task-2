@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\OrderStatusUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
 
 class StaffController extends Controller
 {
-    
     public function pendingOrders()
     {
         $orders = Order::with('items.menuItem')
@@ -34,7 +34,6 @@ class StaffController extends Controller
         ]);
     }
 
-
     public function updateStatus(Request $request, $orderId)
     {
         $validated = $request->validate([
@@ -43,6 +42,8 @@ class StaffController extends Controller
 
         $order = Order::findOrFail($orderId);
         $order->update(['status' => $validated['status']]);
+
+        broadcast(new OrderStatusUpdated($order))->toOthers();
 
         return response()->json([
             'message' => 'Order status updated to ' . $validated['status'],

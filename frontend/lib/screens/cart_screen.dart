@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/session_provider.dart';
 import '../services/api_service.dart';
+import 'order_tracking_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -26,15 +27,19 @@ class _CartScreenState extends State<CartScreen> {
       final order = response['data'];
       // Clear the local cart state
       if (context.mounted) {
-        Provider.of<CartProvider>(context, listen: false).clearCart();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Order placed! Your number: ${order['order_number']}'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.of(context).pop();
-      }
+  Provider.of<CartProvider>(context, listen: false).clearCart();
+  Navigator.of(context).pushReplacement(
+    MaterialPageRoute(
+      builder: (_) => OrderTrackingScreen(
+        orderId: order['id'],
+        orderNumber: order['order_number'],
+        initialStatus: order['status'],
+        totalAmount: double.parse(order['total_amount'].toString()),
+      ),
+    ),
+  );
+}
+
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

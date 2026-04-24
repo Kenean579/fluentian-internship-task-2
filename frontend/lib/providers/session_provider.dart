@@ -8,17 +8,39 @@ class SessionProvider with ChangeNotifier {
   String? _userDeviceId;
   int? _sessionId;
   bool _isLoading = false;
+  bool _sessionRestored = false;
 
   String? get tableId => _tableId;
   int? get sessionId => _sessionId;
   bool get isLoading => _isLoading;
+  bool get sessionRestored => _sessionRestored;
+  bool get hasActiveSession => _sessionId != null;
+
+  Future<void> restoreSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    _userDeviceId = prefs.getString('user_device_id');
+    final savedTableId = prefs.getString('last_table_id');
+
+    if (_userDeviceId != null && savedTableId != null) {
+      try {
+        final response = await ApiService.post('/sessions/start', {
+          'table_id': savedTableId,
+          'user_device_id': _userDeviceId,
+        });
+        _tableId = savedTableId;
+        _sessionId = response['session']['id'];
+      } catch (_) {
+      }
+    }
+
+    _sessionRestored = true;
+    notifyListeners();
+  }
 
   Future<void> initializeDevice() async {
     final prefs = await SharedPreferences.getInstance();
     _userDeviceId = prefs.getString('user_device_id');
-    
     if (_userDeviceId == null) {
-      // Generate a unique ID for this device if it doesn't exist
       _userDeviceId = const Uuid().v4();
       await prefs.setString('user_device_id', _userDeviceId!);
     }
@@ -38,7 +60,10 @@ class SessionProvider with ChangeNotifier {
 
       _tableId = scannedTableId;
       _sessionId = response['session']['id'];
-      
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('last_table_id', scannedTableId);
+
       _isLoading = false;
       notifyListeners();
       return true;

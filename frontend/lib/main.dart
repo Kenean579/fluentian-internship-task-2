@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'providers/session_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/menu_provider.dart';
+import 'providers/recommendation_provider.dart';
 import 'screens/qr_scanner_screen.dart';
+import 'screens/menu_screen.dart';
 
 void main() {
   runApp(
@@ -12,6 +14,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => SessionProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => MenuProvider()),
+        ChangeNotifierProvider(create: (_) => RecommendationProvider()),
       ],
       child: const SmartRestaurantApp(),
     ),
@@ -30,7 +33,45 @@ class SmartRestaurantApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
         useMaterial3: true,
       ),
-      home: const QRScannerScreen(),
+      home: const AppStartup(),
     );
+  }
+}
+
+
+class AppStartup extends StatefulWidget {
+  const AppStartup({super.key});
+
+  @override
+  State<AppStartup> createState() => _AppStartupState();
+}
+
+class _AppStartupState extends State<AppStartup> {
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    final session = Provider.of<SessionProvider>(context, listen: false);
+    await session.restoreSession();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final session = Provider.of<SessionProvider>(context);
+
+    if (!session.sessionRestored) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (session.hasActiveSession) {
+      return const MenuScreen();
+    }
+
+    return const QRScannerScreen();
   }
 }

@@ -13,7 +13,7 @@ A full-stack restaurant ordering platform built with **Laravel 11** (backend) an
 ## Tech Stack
 | Layer | Technology |
 |-------|-----------|
-| Backend | Laravel 11 + MySQL |
+| Backend | Laravel 13 + MySQL |
 | Frontend | Flutter (Web + Mobile) |
 | Real-time | Pusher |
 | Database | MySQL via Laragon |

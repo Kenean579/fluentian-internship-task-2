@@ -39,6 +39,136 @@ class _MenuScreenState extends State<MenuScreen> {
     });
   }
 
+  void _showItemDetails(MenuItem item, SessionProvider session, CartProvider cart, KitchenProvider kitchen) {
+    int quantity = 1;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      item.name,
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Text(
+                    'ETB ${item.price.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18),
+                  ),
+                  const Spacer(),
+                  Icon(Icons.timer_outlined, size: 16, color: kitchen.extraMinutes > 0 ? Colors.red : Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${item.prepTime + kitchen.extraMinutes} min',
+                    style: TextStyle(color: kitchen.extraMinutes > 0 ? Colors.red : Colors.grey),
+                  ),
+                ],
+              ),
+              const Divider(height: 32),
+              const Text(
+                'Description',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                item.description.isNotEmpty ? item.description : 'Authentic Ethiopian dish prepared with fresh local ingredients.',
+                style: const TextStyle(color: Colors.black87, fontSize: 15, height: 1.4),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Quantity',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove),
+                          onPressed: quantity > 1 ? () => setModalState(() => quantity--) : null,
+                        ),
+                        Text(
+                          '$quantity',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () => setModalState(() => quantity++),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: session.sessionId == null || !item.available
+                      ? null
+                      : () async {
+                          final success = await cart.addItem(session.sessionId!, item.id, quantity);
+                          if (success && mounted) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('$quantity x ${item.name} added to cart!'),
+                              backgroundColor: Colors.green,
+                              duration: const Duration(seconds: 1),
+                            ));
+                          }
+                        },
+                  child: Text(
+                    item.available ? 'Add to Cart' : 'Currently Unavailable',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final menuProvider = Provider.of<MenuProvider>(context);
@@ -132,7 +262,6 @@ class _MenuScreenState extends State<MenuScreen> {
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // AI Kitchen Load Warning (Requirement 7)
                     if (kitchen.extraMinutes > 0)
                       Container(
                         width: double.infinity,
@@ -405,93 +534,74 @@ class _MenuScreenState extends State<MenuScreen> {
                         itemBuilder: (ctx, index) {
                           final item = menuProvider
                               .categories[_selectedCategoryIndex].items[index];
-                          return Container(
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.black.withAlpha(10),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4))
-                                ]),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(item.name,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16)),
-                                        const SizedBox(height: 4),
-                                        Text(item.description,
-                                            style: const TextStyle(
-                                                color: Colors.grey, fontSize: 13)),
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'ETB ${item.price.toStringAsFixed(2)}',
+                          return InkWell(
+                            onTap: () => _showItemDetails(item, session, cart, kitchen),
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black.withAlpha(10),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 4))
+                                  ]),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(item.name,
                                               style: const TextStyle(
-                                                  color: Colors.orange,
                                                   fontWeight: FontWeight.bold,
-                                                  fontSize: 15),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            Icon(Icons.timer_outlined,
-                                                size: 14,
-                                                color: kitchen.extraMinutes > 0 ? Colors.red : Colors.grey[600]),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                                '${item.prepTime + kitchen.extraMinutes} min',
-                                                style: TextStyle(
-                                                    color: kitchen.extraMinutes > 0 ? Colors.red : Colors.grey[600],
-                                                    fontWeight: kitchen.extraMinutes > 0 ? FontWeight.bold : FontWeight.normal,
-                                                    fontSize: 12)),
-                                            if (kitchen.extraMinutes > 0)
-                                              const Padding(
-                                                padding: EdgeInsets.only(left: 4),
-                                                child: Text('(Predicted)', style: TextStyle(fontSize: 10, color: Colors.red)),
+                                                  fontSize: 16)),
+                                          const SizedBox(height: 4),
+                                          Text(item.description,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                  color: Colors.grey, fontSize: 13)),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                'ETB ${item.price.toStringAsFixed(2)}',
+                                                style: const TextStyle(
+                                                    color: Colors.orange,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 15),
                                               ),
-                                          ],
-                                        ),
-                                      ],
+                                              const SizedBox(width: 12),
+                                              Icon(Icons.timer_outlined,
+                                                  size: 14,
+                                                  color: kitchen.extraMinutes > 0 ? Colors.red : Colors.grey[600]),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                  '${item.prepTime + kitchen.extraMinutes} min',
+                                                  style: TextStyle(
+                                                      color: kitchen.extraMinutes > 0 ? Colors.red : Colors.grey[600],
+                                                      fontWeight: kitchen.extraMinutes > 0 ? FontWeight.bold : FontWeight.normal,
+                                                      fontSize: 12)),
+                                              if (kitchen.extraMinutes > 0)
+                                                const Padding(
+                                                  padding: EdgeInsets.only(left: 4),
+                                                  child: Text('(Predicted)', style: TextStyle(fontSize: 10, color: Colors.red)),
+                                                ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.orange,
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8)),
-                                    ),
-                                    onPressed: session.sessionId == null
-                                        ? null
-                                        : () async {
-                                            final success = await cart.addItem(
-                                                session.sessionId!, item.id, 1);
-                                            if (success && context.mounted) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(SnackBar(
-                                                content: Text(
-                                                    '${item.name} added to cart!'),
-                                                backgroundColor: Colors.green,
-                                                duration:
-                                                    const Duration(seconds: 1),
-                                              ));
-                                            }
-                                          },
-                                    child: const Text('Add'),
-                                  ),
-                                ],
+                                    const SizedBox(width: 8),
+                                    const Icon(Icons.chevron_right, color: Colors.grey),
+                                  ],
+                                ),
                               ),
                             ),
                           );

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\RecommendationController;
+use App\Http\Controllers\Api\UserBehaviorController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -34,3 +35,6 @@ Route::patch('/staff/orders/{orderId}/status', [StaffController::class, 'updateS
 
 // AI Recommendation route
 Route::get('/sessions/{sessionId}/recommendations', [RecommendationController::class, 'recommend']);
+
+// User Behavior Tracking route
+Route::get('/sessions/{sessionId}/behavior', [UserBehaviorController::class, 'profile']);

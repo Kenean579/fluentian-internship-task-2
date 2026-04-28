@@ -15,6 +15,9 @@ frontend/.flutter-plugins
 frontend/.flutter-plugins-dependencies
 frontend/build/
 frontend/.packages
+frontend/android/app/build/
+frontend/android/build/
+frontend/macos/Flutter/GeneratedPluginRegistrant.swift
 
 # OS
 .DS_Store

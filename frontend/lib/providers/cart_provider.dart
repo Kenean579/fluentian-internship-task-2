@@ -92,6 +92,23 @@ class CartProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> updateItemQuantity(int sessionId, int cartItemId, int newQuantity) async {
+    try {
+      final response = await ApiService.patch(
+        '/sessions/$sessionId/cart/items/$cartItemId',
+        {'quantity': newQuantity},
+      );
+      final cartData = response['data'];
+      _items = (cartData['items'] as List)
+          .map((item) => CartItem.fromJson(item))
+          .toList();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   void clearCart() {
     _items = [];
     notifyListeners();

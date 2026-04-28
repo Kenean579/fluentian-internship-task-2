@@ -23,6 +23,7 @@ Route::get('/menu', [MenuController::class, 'index']);
 Route::get('/sessions/{sessionId}/cart', [CartController::class, 'show']);
 Route::post('/sessions/{sessionId}/cart', [CartController::class, 'add']);
 Route::delete('/sessions/{sessionId}/cart/items/{cartItemId}', [CartController::class, 'remove']);
+Route::patch('/sessions/{sessionId}/cart/items/{cartItemId}', [CartController::class, 'update']);
 
 // Customer order routes
 Route::post('/sessions/{sessionId}/orders', [OrderController::class, 'place']);

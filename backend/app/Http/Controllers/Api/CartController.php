@@ -79,4 +79,27 @@ class CartController extends Controller
             'data' => $cart,
         ]);
     }
+
+    public function update(Request $request, $sessionId, $cartItemId)
+    {
+        $validated = $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $session = TableSession::findOrFail($sessionId);
+        $cart = Cart::where('session_id', $session->id)->firstOrFail();
+
+        $cartItem = CartItem::where('id', $cartItemId)
+            ->where('cart_id', $cart->id)
+            ->firstOrFail();
+
+        $cartItem->update(['quantity' => $validated['quantity']]);
+
+        $cart->load('items.menuItem');
+
+        return response()->json([
+            'message' => 'Cart item updated',
+            'data' => $cart,
+        ]);
+    }
 }

@@ -84,26 +84,57 @@ class _CartScreenState extends State<CartScreen> {
                         itemBuilder: (ctx, index) {
                           final item = cart.items[index];
                           return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 6),
-                            child: ListTile(
-                              title: Text(item.menuItemName,
-                                  style: const TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Text(
-                                  'Qty: ${item.quantity}  ×  ETB ${item.unitPrice.toStringAsFixed(2)}'),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
+                            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Row(
                                 children: [
-                                  Text(
-                                    'ETB ${item.total.toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.orange),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(item.menuItemName,
+                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                        const SizedBox(height: 4),
+                                        Text('ETB ${item.unitPrice.toStringAsFixed(2)} each',
+                                            style: const TextStyle(color: Colors.grey, fontSize: 14)),
+                                      ],
+                                    ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline,
-                                        color: Colors.red),
-                                    onPressed: () => cart.removeItem(
-                                        session.sessionId!, item.id),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.remove, size: 20),
+                                              onPressed: item.quantity > 1 
+                                                ? () => cart.updateItemQuantity(session.sessionId!, item.id, item.quantity - 1)
+                                                : () => cart.removeItem(session.sessionId!, item.id),
+                                            ),
+                                            Text('${item.quantity}', 
+                                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                            IconButton(
+                                              icon: const Icon(Icons.add, size: 20),
+                                              onPressed: () => cart.updateItemQuantity(session.sessionId!, item.id, item.quantity + 1),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'ETB ${item.total.toStringAsFixed(2)}',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.orange),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),

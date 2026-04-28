@@ -9,12 +9,14 @@ class SessionProvider with ChangeNotifier {
   int? _sessionId;
   bool _isLoading = false;
   bool _sessionRestored = false;
+  Map<String, dynamic>? _lastActiveOrder;
 
   String? get tableId => _tableId;
   int? get sessionId => _sessionId;
   bool get isLoading => _isLoading;
   bool get sessionRestored => _sessionRestored;
   bool get hasActiveSession => _sessionId != null;
+  Map<String, dynamic>? get lastActiveOrder => _lastActiveOrder;
 
   Future<void> restoreSession() async {
     final prefs = await SharedPreferences.getInstance();
@@ -29,6 +31,16 @@ class SessionProvider with ChangeNotifier {
         });
         _tableId = savedTableId;
         _sessionId = response['session']['id'];
+
+        // Check for active orders to resume tracking
+        final ordersResponse = await ApiService.get('/sessions/$_sessionId/orders');
+        final List orders = ordersResponse['data'];
+        if (orders.isNotEmpty) {
+          final mostRecent = orders.first;
+          if (mostRecent['status'] != 'Delivered') {
+            _lastActiveOrder = mostRecent;
+          }
+        }
       } catch (_) {
       }
     }

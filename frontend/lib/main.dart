@@ -8,6 +8,7 @@ import 'providers/user_behavior_provider.dart';
 import 'providers/kitchen_provider.dart';
 import 'screens/qr_scanner_screen.dart';
 import 'screens/menu_screen.dart';
+import 'screens/order_tracking_screen.dart';
 
 void main() {
   runApp(
@@ -60,6 +61,11 @@ class _AppStartupState extends State<AppStartup> {
   Future<void> _init() async {
     final session = Provider.of<SessionProvider>(context, listen: false);
     await session.restoreSession();
+    
+    if (session.hasActiveSession && mounted) {
+      // Restore cart data from server
+      Provider.of<CartProvider>(context, listen: false).fetchCart(session.sessionId!);
+    }
   }
 
   @override
@@ -73,6 +79,15 @@ class _AppStartupState extends State<AppStartup> {
     }
 
     if (session.hasActiveSession) {
+      if (session.lastActiveOrder != null) {
+        final order = session.lastActiveOrder!;
+        return OrderTrackingScreen(
+          orderId: order['id'],
+          orderNumber: order['order_number'],
+          initialStatus: order['status'],
+          totalAmount: double.parse(order['total_amount'].toString()),
+        );
+      }
       return const MenuScreen();
     }
 

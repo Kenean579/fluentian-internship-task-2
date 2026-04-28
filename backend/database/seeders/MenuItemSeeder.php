@@ -10,75 +10,74 @@ class MenuItemSeeder extends Seeder
 {
     public function run(): void
     {
-        $starters   = Category::where('name', 'Starters')->first()->id;
-        $main       = Category::where('name', 'Main Course')->first()->id;
-        $pizza      = Category::where('name', 'Pizzas')->first()->id;
-        $desserts   = Category::where('name', 'Desserts')->first()->id;
-        $drinks     = Category::where('name', 'Drinks')->first()->id;
+        $traditional = Category::where('name', 'Traditional Mains')->first()->id;
+        $meat        = Category::where('name', 'Meat Dishes')->first()->id;
+        $vegetarian  = Category::where('name', 'Vegetarian')->first()->id;
+        $beverages   = Category::where('name', 'Beverages')->first()->id;
 
         $items = [
             [
-                'category_id' => $starters,
-                'name'        => 'Garlic Bread',
-                'description' => 'Toasted bread with garlic butter and herbs',
-                'price'       => 4.99,
-                'prep_time'   => 8,
+                'category_id' => $traditional,
+                'name'        => 'Doro Wat',
+                'description' => 'Spicy chicken stew with hard-boiled egg and injera',
+                'price'       => 450.00,
+                'prep_time'   => 20,
                 'available'   => true,
             ],
             [
-                'category_id' => $starters,
-                'name'        => 'Chicken Wings',
-                'description' => 'Crispy wings with BBQ dipping sauce',
-                'price'       => 9.99,
+                'category_id' => $vegetarian,
+                'name'        => 'Shiro Wat',
+                'description' => 'Delicious chickpea powder stew served with injera',
+                'price'       => 150.00,
                 'prep_time'   => 15,
                 'available'   => true,
             ],
             [
-                'category_id' => $main,
-                'name'        => 'Grilled Salmon',
-                'description' => 'Fresh Atlantic salmon with seasonal vegetables',
-                'price'       => 18.99,
-                'prep_time'   => 20,
-                'available'   => true,
-            ],
-            [
-                'category_id' => $main,
-                'name'        => 'Beef Burger',
-                'description' => 'Juicy 200g beef patty with fries',
-                'price'       => 14.99,
+                'category_id' => $meat,
+                'name'        => 'Awaze Tibs',
+                'description' => 'Pan-fried beef cubes with awaze sauce, onions, and jalapeños',
+                'price'       => 350.00,
                 'prep_time'   => 18,
                 'available'   => true,
             ],
             [
-                'category_id' => $pizza,
-                'name'        => 'Margherita Pizza',
-                'description' => 'Classic tomato, mozzarella, and basil',
-                'price'       => 12.99,
-                'prep_time'   => 20,
-                'available'   => true,
-            ],
-            [
-                'category_id' => $pizza,
-                'name'        => 'Pepperoni Pizza',
-                'description' => 'Loaded with pepperoni and melted cheese',
-                'price'       => 14.99,
-                'prep_time'   => 22,
-                'available'   => true,
-            ],
-            [
-                'category_id' => $desserts,
-                'name'        => 'Chocolate Lava Cake',
-                'description' => 'Warm chocolate cake with a molten center',
-                'price'       => 6.99,
+                'category_id' => $meat,
+                'name'        => 'Kitfo',
+                'description' => 'Minced raw beef marinated in mitmita and niter kibbeh',
+                'price'       => 400.00,
                 'prep_time'   => 12,
                 'available'   => true,
             ],
             [
-                'category_id' => $drinks,
-                'name'        => 'Fresh Orange Juice',
-                'description' => 'Freshly squeezed orange juice',
-                'price'       => 3.99,
-                'prep_time'   => 3,
+                'category_id' => $vegetarian,
+                'name'        => 'Beyaynetu',
+                'description' => 'A colorful platter of mixed vegetarian stews and salads',
+                'price'       => 200.00,
+                'prep_time'   => 25,
+                'available'   => true,
+            ],
+            [
+                'category_id' => $traditional,
+                'name'        => 'Firfir',
+                'description' => 'Shredded injera mixed with spicy stew',
+                'price'       => 180.00,
+                'prep_time'   => 10,
+                'available'   => true,
+            ],
+            [
+                'category_id' => $beverages,
+                'name'        => 'Traditional Ethiopian Coffee',
+                'description' => 'Strong and aromatic freshly roasted coffee (Buna)',
+                'price'       => 30.00,
+                'prep_time'   => 10,
+                'available'   => true,
+            ],
+            [
+                'category_id' => $beverages,
+                'name'        => 'Tej',
+                'description' => 'Traditional Ethiopian honey wine',
+                'price'       => 100.00,
+                'prep_time'   => 5,
                 'available'   => true,
             ],
         ];

@@ -158,7 +158,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Total: \$${widget.totalAmount.toStringAsFixed(2)}',
+                    'Total: ETB ${widget.totalAmount.toStringAsFixed(2)}',
                     style: const TextStyle(color: Colors.grey),
                   ),
                 ],

@@ -89,12 +89,12 @@ class _CartScreenState extends State<CartScreen> {
                               title: Text(item.menuItemName,
                                   style: const TextStyle(fontWeight: FontWeight.bold)),
                               subtitle: Text(
-                                  'Qty: ${item.quantity}  ×  \$${item.unitPrice.toStringAsFixed(2)}'),
+                                  'Qty: ${item.quantity}  ×  ETB ${item.unitPrice.toStringAsFixed(2)}'),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    '\$${item.total.toStringAsFixed(2)}',
+                                    'ETB ${item.total.toStringAsFixed(2)}',
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.orange),
@@ -133,7 +133,7 @@ class _CartScreenState extends State<CartScreen> {
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold)),
                               Text(
-                                '\$${cart.totalAmount.toStringAsFixed(2)}',
+                                'ETB ${cart.totalAmount.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,

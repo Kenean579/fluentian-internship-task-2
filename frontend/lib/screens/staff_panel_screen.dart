@@ -204,7 +204,7 @@ class _StaffPanelScreenState extends State<StaffPanelScreen> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'Total: \$${double.parse(order['total_amount'].toString()).toStringAsFixed(2)}',
+                                        'Total: ETB ${double.parse(order['total_amount'].toString()).toStringAsFixed(2)}',
                                         style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             color: Colors.deepOrange),

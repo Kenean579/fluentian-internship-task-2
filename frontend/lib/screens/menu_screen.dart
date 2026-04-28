@@ -164,7 +164,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          '\$${item.price.toStringAsFixed(2)}',
+                                          'ETB ${item.price.toStringAsFixed(2)}',
                                           style: const TextStyle(
                                               color: Colors.orange,
                                               fontWeight: FontWeight.bold),
@@ -283,7 +283,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                         Row(
                                           children: [
                                             Text(
-                                              '\$${item.price.toStringAsFixed(2)}',
+                                              'ETB ${item.price.toStringAsFixed(2)}',
                                               style: const TextStyle(
                                                   color: Colors.orange,
                                                   fontWeight: FontWeight.bold,

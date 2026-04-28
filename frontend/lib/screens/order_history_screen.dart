@@ -115,7 +115,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Total: \$${double.parse(order['total_amount'].toString()).toStringAsFixed(2)}',
+                              'Total: ETB ${double.parse(order['total_amount'].toString()).toStringAsFixed(2)}',
                               style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: Colors.orange),

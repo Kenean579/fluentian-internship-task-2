@@ -157,11 +157,29 @@ Tier 3: Featured (cold start)
 ```
 
 **Why it's not decorative:**
-- Results change dynamically as orders are placed
-- Cart items are explicitly excluded (no point recommending what you already have)
-- Unavailable items are excluded
-- The recommendation type label is returned so the UI can display context
 - Shown as a horizontal carousel on the menu screen
+
+---
+
+### 8. AI Feature — Dynamic Wait-Time Prediction (Requirement 7)
+
+**Endpoint:** `GET /api/kitchen/load`
+
+The system monitors kitchen congestion in real-time to prevent unrealistic customer expectations.
+
+**Logic:**
+- Counts active orders (status: `received` or `cooking`).
+- **Load Balancing:**
+  - 0-4 orders: **Normal** (+0 mins)
+  - 5-9 orders: **Medium** (+5 mins)
+  - 10+ orders: **High** (+15 mins)
+- The Menu Screen displays a **"High Demand"** alert banner if the kitchen is busy.
+- Individual menu item prep times are **dynamically adjusted** in the UI to show the "Predicted" time.
+
+**Why it's meaningful:**
+- It is a predictive model based on real-time system load.
+- It directly impacts user behavior (customers might choose faster items if the kitchen is busy).
+- Uses logic typically found in professional food delivery apps (UberEats/DoorDash).
 
 ---
 
@@ -200,9 +218,19 @@ php artisan serve --host=0.0.0.0 --port=8000
 cd frontend
 flutter pub get
 # In lib/services/api_service.dart:
-# Set baseUrl to your PC's local IP e.g. http://192.168.1.x:8000/api
 flutter run
 ```
+
+### 🚀 Production Deployment (Render)
+
+The backend is configured for deployment on **Render.com**.
+
+1. **Root Directory:** `backend`
+2. **Build Command:** `./render-build.sh`
+3. **Start Command:** `vendor/bin/heroku-php-apache2 public/`
+4. **Environment Variables Required:**
+   - `APP_KEY`, `APP_DEBUG=false`, `DB_CONNECTION=pgsql`, `DATABASE_URL`, `BROADCAST_DRIVER=pusher`
+
 
 ---
 
@@ -259,5 +287,7 @@ flutter run
 - ✅ Session persistence across app restarts
 - ✅ Cross-session user behavior profile
 - ✅ AI recommendation carousel on menu screen
+- ✅ AI dynamic wait-time prediction based on kitchen load
 - ✅ Estimated waiting time on order tracking screen
 - ✅ Order history for current session
+- ✅ Automated Render deployment scripts

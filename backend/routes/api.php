@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\RecommendationController;
 use App\Http\Controllers\Api\UserBehaviorController;
+use App\Http\Controllers\Api\KitchenLoadController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -38,3 +39,6 @@ Route::get('/sessions/{sessionId}/recommendations', [RecommendationController::c
 
 // User Behavior Tracking route
 Route::get('/sessions/{sessionId}/behavior', [UserBehaviorController::class, 'profile']);
+
+// AI Kitchen Load Prediction (Requirement 7)
+Route::get('/kitchen/load', [KitchenLoadController::class, 'getLoadStatus']);

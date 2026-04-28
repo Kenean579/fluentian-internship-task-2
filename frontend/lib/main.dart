@@ -5,6 +5,7 @@ import 'providers/cart_provider.dart';
 import 'providers/menu_provider.dart';
 import 'providers/recommendation_provider.dart';
 import 'providers/user_behavior_provider.dart';
+import 'providers/kitchen_provider.dart';
 import 'screens/qr_scanner_screen.dart';
 import 'screens/menu_screen.dart';
 
@@ -17,6 +18,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => MenuProvider()),
         ChangeNotifierProvider(create: (_) => RecommendationProvider()),
         ChangeNotifierProvider(create: (_) => UserBehaviorProvider()),
+        ChangeNotifierProvider(create: (_) => KitchenProvider()),
       ],
       child: const SmartRestaurantApp(),
     ),

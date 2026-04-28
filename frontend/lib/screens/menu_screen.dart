@@ -5,6 +5,7 @@ import '../providers/cart_provider.dart';
 import '../providers/session_provider.dart';
 import '../providers/recommendation_provider.dart';
 import '../providers/user_behavior_provider.dart';
+import '../providers/kitchen_provider.dart';
 import 'cart_screen.dart';
 import 'staff_panel_screen.dart';
 import 'order_history_screen.dart';
@@ -32,6 +33,8 @@ class _MenuScreenState extends State<MenuScreen> {
             .fetchRecommendations(session.sessionId!);
         Provider.of<UserBehaviorProvider>(context, listen: false)
             .fetchProfile(session.sessionId!);
+        Provider.of<KitchenProvider>(context, listen: false)
+            .fetchLoadStatus();
       }
     });
   }
@@ -43,6 +46,7 @@ class _MenuScreenState extends State<MenuScreen> {
     final session = Provider.of<SessionProvider>(context);
     final recs = Provider.of<RecommendationProvider>(context);
     final behavior = Provider.of<UserBehaviorProvider>(context);
+    final kitchen = Provider.of<KitchenProvider>(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -128,6 +132,26 @@ class _MenuScreenState extends State<MenuScreen> {
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // AI Kitchen Load Warning (Requirement 7)
+                    if (kitchen.extraMinutes > 0)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        color: Colors.red[50],
+                        child: Row(
+                          children: [
+                            const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'High Demand: +${kitchen.extraMinutes} mins predicted prep time.',
+                                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
                     if (recs.isLoading)
                       const Padding(
                         padding: EdgeInsets.all(12),
@@ -422,12 +446,19 @@ class _MenuScreenState extends State<MenuScreen> {
                                             const SizedBox(width: 12),
                                             Icon(Icons.timer_outlined,
                                                 size: 14,
-                                                color: Colors.grey[600]),
+                                                color: kitchen.extraMinutes > 0 ? Colors.red : Colors.grey[600]),
                                             const SizedBox(width: 4),
-                                            Text('${item.prepTime} min',
+                                            Text(
+                                                '${item.prepTime + kitchen.extraMinutes} min',
                                                 style: TextStyle(
-                                                    color: Colors.grey[600],
+                                                    color: kitchen.extraMinutes > 0 ? Colors.red : Colors.grey[600],
+                                                    fontWeight: kitchen.extraMinutes > 0 ? FontWeight.bold : FontWeight.normal,
                                                     fontSize: 12)),
+                                            if (kitchen.extraMinutes > 0)
+                                              const Padding(
+                                                padding: EdgeInsets.only(left: 4),
+                                                child: Text('(Predicted)', style: TextStyle(fontSize: 10, color: Colors.red)),
+                                              ),
                                           ],
                                         ),
                                       ],

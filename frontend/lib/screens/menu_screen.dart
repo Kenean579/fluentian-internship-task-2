@@ -4,6 +4,7 @@ import '../providers/menu_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/session_provider.dart';
 import '../providers/recommendation_provider.dart';
+import '../providers/user_behavior_provider.dart';
 import 'cart_screen.dart';
 import 'staff_panel_screen.dart';
 import 'order_history_screen.dart';
@@ -23,11 +24,14 @@ class _MenuScreenState extends State<MenuScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
+      if (!mounted) return;
       final session = Provider.of<SessionProvider>(context, listen: false);
       Provider.of<MenuProvider>(context, listen: false).fetchMenu();
       if (session.sessionId != null) {
         Provider.of<RecommendationProvider>(context, listen: false)
             .fetchRecommendations(session.sessionId!);
+        Provider.of<UserBehaviorProvider>(context, listen: false)
+            .fetchProfile(session.sessionId!);
       }
     });
   }
@@ -38,6 +42,7 @@ class _MenuScreenState extends State<MenuScreen> {
     final cart = Provider.of<CartProvider>(context);
     final session = Provider.of<SessionProvider>(context);
     final recs = Provider.of<RecommendationProvider>(context);
+    final behavior = Provider.of<UserBehaviorProvider>(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -72,18 +77,36 @@ class _MenuScreenState extends State<MenuScreen> {
             ],
           ),
           IconButton(
-            icon: const Icon(Icons.admin_panel_settings_outlined),
-            tooltip: 'Staff Panel',
-            onPressed: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const StaffPanelScreen())),
+            icon: const Icon(Icons.receipt_long, color: Colors.white),
+            tooltip: 'Order History',
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const OrderHistoryScreen()));
+            },
           ),
-          IconButton(
-          icon: const Icon(Icons.receipt_long, color: Colors.white),
-          tooltip: 'Order History',
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const OrderHistoryScreen()));
-          },
-        ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              if (value == 'staff') {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const StaffPanelScreen()));
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'staff',
+                child: Row(
+                  children: [
+                    Icon(Icons.admin_panel_settings, color: Colors.orange),
+                    SizedBox(width: 8),
+                    Text('Staff Mode'),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       body: menuProvider.isLoading
@@ -105,7 +128,6 @@ class _MenuScreenState extends State<MenuScreen> {
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // AI Recommendations Carousel
                     if (recs.isLoading)
                       const Padding(
                         padding: EdgeInsets.all(12),
@@ -131,16 +153,21 @@ class _MenuScreenState extends State<MenuScreen> {
                             return Container(
                               width: 200,
                               margin: const EdgeInsets.only(right: 10),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(14),
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2)),
-                                ],
-                              ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    colors: [Colors.white, Colors.orange.withAlpha(13)],
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black.withAlpha(13),
+                                        blurRadius: 10,
+                                        spreadRadius: 1,
+                                        offset: const Offset(0, 4)),
+                                  ],
+                                ),
                               child: Padding(
                                 padding: const EdgeInsets.all(12),
                                 child: Column(
@@ -211,7 +238,98 @@ class _MenuScreenState extends State<MenuScreen> {
                       const Divider(height: 1),
                     ],
 
-                    // Category Filter Tabs 
+    
+                    if (behavior.recentlyOrdered.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.history, color: Colors.orange, size: 20),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Recently Ordered',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 60,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          itemCount: behavior.recentlyOrdered.length,
+                          itemBuilder: (ctx, index) {
+                            final item = behavior.recentlyOrdered[index];
+                            return Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              child: ActionChip(
+                                label: Text(item['name']),
+                                avatar: const Icon(Icons.restaurant, size: 14),
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Re-order ${item['name']} from the menu below!'))
+                                  );
+                                },
+                                backgroundColor: Colors.white,
+                                side: const BorderSide(color: Colors.orange),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                    if (behavior.mostOrdered.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.star_border, color: Colors.orange, size: 20),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Your Favorites',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 100,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          itemCount: behavior.mostOrdered.length,
+                          itemBuilder: (ctx, index) {
+                            final item = behavior.mostOrdered[index];
+                            return Card(
+                              margin: const EdgeInsets.only(right: 10),
+                              child: Container(
+                                width: 150,
+                                padding: const EdgeInsets.all(8),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(item['name'], 
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                      maxLines: 1, 
+                                      overflow: TextOverflow.ellipsis
+                                    ),
+                                    Text('Ordered ${item['total_quantity']} times', 
+                                      style: const TextStyle(fontSize: 11, color: Colors.grey)
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+
+ 
                     SizedBox(
                       height: 50,
                       child: ListView.builder(
@@ -230,8 +348,15 @@ class _MenuScreenState extends State<MenuScreen> {
                               padding: const EdgeInsets.symmetric(horizontal: 16),
                               decoration: BoxDecoration(
                                 color: isSelected ? Colors.orange : Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: Colors.orange),
+                                borderRadius: BorderRadius.circular(25),
+                                boxShadow: isSelected ? [
+                                  BoxShadow(
+                                    color: Colors.orange.withAlpha(77),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4)
+                                  )
+                                ] : [],
+                                border: Border.all(color: Colors.orange.withAlpha(77)),
                               ),
                               child: Center(
                                 child: Text(
@@ -248,7 +373,6 @@ class _MenuScreenState extends State<MenuScreen> {
                       ),
                     ),
 
-                    // Menu Items 
                     Expanded(
                       child: ListView.builder(
                         padding: const EdgeInsets.all(12),
@@ -257,11 +381,17 @@ class _MenuScreenState extends State<MenuScreen> {
                         itemBuilder: (ctx, index) {
                           final item = menuProvider
                               .categories[_selectedCategoryIndex].items[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 6),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                            elevation: 2,
+                          return Container(
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.black.withAlpha(10),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4))
+                                ]),
                             child: Padding(
                               padding: const EdgeInsets.all(12),
                               child: Row(

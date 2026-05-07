@@ -16,7 +16,7 @@ class KitchenLoadController extends Controller
      */
     public function getLoadStatus()
     {
-        $activeOrdersCount = Order::whereIn('status', ['received', 'cooking'])->count();
+        $activeOrdersCount = Order::whereIn('status', ['Received', 'Cooking'])->count();
         
         $loadStatus = 'Normal';
         $extraMinutes = 0;

@@ -83,7 +83,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
       _pusher = PusherChannelsFlutter.getInstance();
 
       await _pusher!.init(
-        // Replace with your actual Pusher key and cluster
         apiKey: 'ba40d2983aa159db3e09',
         cluster: 'ap2',
       );

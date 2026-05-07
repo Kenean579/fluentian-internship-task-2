@@ -36,6 +36,7 @@ class OrderController extends Controller
             'order_number' => $orderNumber,
             'session_id' => $session->id,
             'status' => 'Received',
+            'payment_method' => $request->payment_method ?? 'Cash',
             'total_amount' => $totalAmount,
         ]);
 

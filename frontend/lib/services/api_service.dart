@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
+  // Use your local IP for development: http://192.168.x.x:8000/api
+  // Use your Render URL for production: https://smart-restaurant-api.onrender.com/api
   static const String baseUrl = 'http://192.168.0.157:8000/api';
 
   static Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> data) async {

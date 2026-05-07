@@ -231,6 +231,16 @@ The backend is configured for deployment on **Render.com**.
 4. **Environment Variables Required:**
    - `APP_KEY`, `APP_DEBUG=false`, `DB_CONNECTION=pgsql`, `DATABASE_URL`, `BROADCAST_DRIVER=pusher`
 
+### 📱 Production APK Build
+
+To generate the final Android app for submission:
+
+```bash
+cd frontend
+flutter build apk --release
+```
+The file will be located at: `build/app/outputs/flutter-apk/app-release.apk`
+
 
 ---
 
@@ -291,3 +301,6 @@ The backend is configured for deployment on **Render.com**.
 - ✅ Estimated waiting time on order tracking screen
 - ✅ Order history for current session
 - ✅ Automated Render deployment scripts
+- ✅ Detailed Item Modal with quantity selector
+- ✅ Payment Simulation (Telebirr, CBE Birr, Cash)
+- ✅ Cart quantity editing & live updates

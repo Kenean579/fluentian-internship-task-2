@@ -22,7 +22,7 @@ class KitchenProvider with ChangeNotifier {
       _loadStatus = response['load_status'] ?? 'Normal';
       _extraMinutes = response['extra_minutes'] ?? 0;
     } catch (e) {
-      print('Error fetching kitchen load: $e');
+      debugPrint('Error fetching kitchen load: $e');
     } finally {
       _isLoading = false;
       notifyListeners();

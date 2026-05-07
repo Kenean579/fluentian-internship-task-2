@@ -26,9 +26,9 @@ class OrderController extends Controller
             ], 422);
         }
 
-        $totalAmount = $cart->items->sum(function ($item) {
-            return $item->unit_price * $item->quantity;
-        });
+        $totalAmount = $cart->items->reduce(function ($carry, $item) {
+            return $carry + ($item->unit_price * $item->quantity);
+        }, 0);
 
         $orderNumber = 'ORD-' . strtoupper(Str::random(6));
 
@@ -52,6 +52,8 @@ class OrderController extends Controller
 
         $cart->items()->delete();
         $order->load('items.menuItem');
+
+        event(new \App\Events\OrderPlaced($order));
 
         return response()->json([
             'message' => 'Order placed successfully!',

@@ -84,8 +84,8 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
 
       await _pusher!.init(
         // Replace with your actual Pusher key and cluster
-        apiKey: 'your_pusher_app_key_here',
-        cluster: 'your_pusher_cluster_here',
+        apiKey: 'PUSHER_APP_KEY',
+        cluster: 'PUSHER_APP_CLUSTER',
       );
 
       await _pusher!.subscribe(

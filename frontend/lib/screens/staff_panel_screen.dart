@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import '../services/api_service.dart';
 
 class StaffPanelScreen extends StatefulWidget {
@@ -12,6 +13,7 @@ class _StaffPanelScreenState extends State<StaffPanelScreen> {
   List<dynamic> _orders = [];
   bool _isLoading = true;
   String? _errorMessage;
+  final PusherChannelsFlutter _pusher = PusherChannelsFlutter.getInstance();
 
   final List<String> _statusOptions = [
     'Received',
@@ -34,6 +36,31 @@ class _StaffPanelScreenState extends State<StaffPanelScreen> {
   void initState() {
     super.initState();
     _fetchOrders();
+    _initPusher();
+  }
+
+  @override
+  void dispose() {
+    _pusher.unsubscribe(channelName: "staff-orders");
+    super.dispose();
+  }
+
+  Future<void> _initPusher() async {
+    try {
+      await _pusher.init(
+        apiKey: 'PUSHER_APP_KEY',
+        cluster: 'PUSHER_APP_CLUSTER',
+        onEvent: (event) {
+          if (event.eventName == 'order.placed') {
+            _fetchOrders(); // Refresh list on new order
+          }
+        },
+      );
+      await _pusher.subscribe(channelName: "staff-orders");
+      await _pusher.connect();
+    } catch (e) {
+      debugPrint("Pusher initialization failed: $e");
+    }
   }
 
   Future<void> _fetchOrders() async {

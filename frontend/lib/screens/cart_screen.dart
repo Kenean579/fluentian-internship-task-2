@@ -92,7 +92,9 @@ class _CartScreenState extends State<CartScreen> {
                     await Future.delayed(const Duration(seconds: 2));
                     if (mounted) {
                       setState(() => _isProcessingPayment = false);
-                      _placeOrder(context, sessionId);
+                      if (context.mounted) {
+                        _placeOrder(context, sessionId);
+                      }
                     }
                   },
                   child: const Text('Confirm & Pay', 
@@ -107,21 +109,17 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildPaymentOption(String title, IconData icon, String subtitle, StateSetter setModalState) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.orange),
+    return RadioListTile<String>(
+      value: title,
+      // ignore: deprecated_member_use
+      groupValue: _selectedPaymentMethod,
+      activeColor: Colors.orange,
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text(subtitle),
-      trailing: Radio<String>(
-        value: title,
-        groupValue: _selectedPaymentMethod,
-        activeColor: Colors.orange,
-        onChanged: (val) {
-          setState(() => _selectedPaymentMethod = val!);
-          setModalState(() {});
-        },
-      ),
-      onTap: () {
-        setState(() => _selectedPaymentMethod = title);
+      secondary: Icon(icon, color: Colors.orange),
+      // ignore: deprecated_member_use
+      onChanged: (val) {
+        setState(() => _selectedPaymentMethod = val!);
         setModalState(() {});
       },
     );
@@ -261,7 +259,7 @@ class _CartScreenState extends State<CartScreen> {
                                       ? null
                                       : () => _showPaymentSelector(context, session.sessionId!),
                                   child: _isPlacingOrder || _isProcessingPayment
-                                      ? const SizedBox(
+                                      ? SizedBox(
                                           height: 20,
                                           width: 20,
                                           child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
@@ -287,11 +285,11 @@ class _CartScreenState extends State<CartScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         CircularProgressIndicator(color: Colors.orange),
-                        const SizedBox(height: 20),
-                        const Text('Simulating Secure Payment...',
+                        SizedBox(height: 20),
+                        Text('Simulating Secure Payment...',
                             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        const SizedBox(height: 8),
-                        const Text('Connecting to Telebirr / CBE gateway',
+                        SizedBox(height: 8),
+                        Text('Connecting to Telebirr / CBE gateway',
                             style: TextStyle(color: Colors.grey)),
                       ],
                     ),

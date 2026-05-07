@@ -48,8 +48,8 @@ class _StaffPanelScreenState extends State<StaffPanelScreen> {
   Future<void> _initPusher() async {
     try {
       await _pusher.init(
-        apiKey: 'PUSHER_APP_KEY',
-        cluster: 'PUSHER_APP_CLUSTER',
+        apiKey: 'ba40d2983aa159db3e09',
+        cluster: 'ap2',
         onEvent: (event) {
           if (event.eventName == 'order.placed') {
             _fetchOrders(); // Refresh list on new order
